@@ -37,7 +37,9 @@ Independent project, not affiliated with Roland. The sound is an approximation, 
 
 GLO page 2 holds TEMPO (the arp/sequence rate), THEME and LINK.
 
-## LINK: drive a second FM-1
+## LINK: drive a second FM-1 (beta)
+> **Beta feature.** LINK is new and under review with the S1Vave maintainer; behaviour may change in later releases.
+
 Two FM-1s can be wired together over USB. Set **GLO page 2, K3 (LINK) to HOST** and the FM-1's USB port becomes a USB-MIDI
 **host**: whatever the arpeggiator and sequencer play (and the touch keys, when the arp is off) is also sent as MIDI
 notes on channel 1 to the other unit, which stays an ordinary USB device. The other FM-1 can run J6, or any firmware
@@ -49,7 +51,7 @@ with class-compliant USB-MIDI, for example [S1Vave](https://github.com/AndrewGG8
   computer on the port (no USB audio or installer): switch LINK off to go back.
 - The screen shows LINK (bright when connected). Panic and a lost cable send all-notes-off; notes that arrived over MIDI
   and are then arpeggiated are forwarded too. MIDI clock is not sent yet.
-- Host mode is new and has only been tested in the simulator so far.
+- Host mode is new and has had limited testing on real hardware.
 
 ## Install
 Download `j6-1.2.0.fwsc` from the [releases](../../releases) and install it with the
