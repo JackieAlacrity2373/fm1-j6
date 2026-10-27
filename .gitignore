@@ -4,3 +4,4 @@ web/
 .jieli/
 **/__pycache__/
 *.exe
+NOTES.local.md
