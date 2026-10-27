@@ -52,6 +52,9 @@ extern volatile uint8_t j_nvoices;       /* sounding now */
 #define J_SEQ_REST 0xFFu
 extern uint8_t j_seq[J_SEQ_MAX], j_seq_vel[J_SEQ_MAX];
 extern volatile uint8_t j_seq_n, j_seq_on, j_seq_rec, j_seq_pos;
+/* called (audio interrupt) with a MIDI status 0x90 / 0x80, note, velocity for each note the arpeggiator or the
+ * sequencer plays; NULL: none. Keys played by hand are not reported: the app sends those itself */
+extern void (*j_tx)(uint8_t status, uint8_t note, uint8_t vel);
 extern volatile uint32_t j_cc_count;     /* counts the parameter changes that came by MIDI CC */
 
 int j_factory_count(void);               /* the memories a fresh unit comes with */

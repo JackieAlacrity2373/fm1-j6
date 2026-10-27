@@ -20,6 +20,7 @@ volatile uint8_t j_arp_on, j_hold, j_nvoices;
 uint8_t j_seq[J_SEQ_MAX], j_seq_vel[J_SEQ_MAX];
 volatile uint8_t j_seq_n, j_seq_on, j_seq_rec, j_seq_pos;
 volatile uint32_t j_cc_count;             /* parameter changes from MIDI: the screen redraws */
+void (*j_tx)(uint8_t, uint8_t, uint8_t);  /* the notes the arpeggiator and the sequencer play, to send on */
 
 /* ------------------------------------------------------------------- state --- */
 typedef struct {
@@ -280,9 +281,28 @@ static void trig_off(int note)
     }
 }
 
+/* notes made by the arpeggiator or the sequencer: sounded here and reported through j_tx */
+static void gon(int note, int vel)
+{
+    if (j_tx)
+        j_tx(0x90u, (uint8_t)note, (uint8_t)vel);
+    trig_on(note, vel);
+}
+
+static void goff(int note)
+{
+    if (j_tx)
+        j_tx(0x80u, (uint8_t)note, 0);
+    trig_off(note);
+}
+
 static void all_off(void)
 {
     int i;
+    if (arp_cur >= 0 && j_tx)
+        j_tx(0x80u, (uint8_t)arp_cur, 0);
+    if (sq_cur >= 0 && j_tx)
+        j_tx(0x80u, (uint8_t)sq_cur, 0);
     for (i = 0; i < J_VOICES; i++)
         gate_off_voice(&vo[i]);
     nstk = 0;
@@ -325,7 +345,7 @@ static void arp_del(int n)
             arp_n[k++] = arp_n[i];
     arp_cnt = (uint8_t)k;
     if (!arp_cnt && arp_cur >= 0) {
-        trig_off(arp_cur);
+        goff(arp_cur);
         arp_cur = -1;
         arp_gate = 0;
     }
@@ -339,7 +359,7 @@ static void arp_step(void)
     if (!arp_cnt)
         return;
     if (arp_cur >= 0)
-        trig_off(arp_cur);
+        goff(arp_cur);
     if (j_g.arp_mode == J_ARP_DOWN) {
         i = n - 1 - arp_idx % n;
     } else if (j_g.arp_mode == J_ARP_UPDN && n > 1) {
@@ -355,7 +375,7 @@ static void arp_step(void)
     note = arp_n[i % arp_cnt] + 12 * (i / arp_cnt);
     if (note > 127)
         note = 127;
-    trig_on(note, arp_vel);
+    gon(note, arp_vel);
     arp_cur = note;
     arp_gate = 1;
 }
@@ -384,7 +404,7 @@ static void set_arp(int on);
 static void seq_stop(void)
 {
     if (sq_cur >= 0)
-        trig_off(sq_cur);
+        goff(sq_cur);
     sq_cur = -1;
     sq_gate = 0;
     j_seq_on = 0;
@@ -839,7 +859,7 @@ static void chunk(uint32_t m, int32_t *out, float gain)
             arp_step();
         } else if (arp_gate && arp_t >= len * 0.5f) {
             if (arp_cur >= 0)
-                trig_off(arp_cur);
+                goff(arp_cur);
             arp_cur = -1;
             arp_gate = 0;
         }
@@ -851,20 +871,20 @@ static void chunk(uint32_t m, int32_t *out, float gain)
         if (sq_t >= len) {
             sq_t = sq_t > len * 4.0f ? 0.0f : sq_t - len;
             if (sq_cur >= 0)
-                trig_off(sq_cur);
+                goff(sq_cur);
             sq_cur = -1;
             if (sq_idx >= j_seq_n)
                 sq_idx = 0;
             j_seq_pos = (uint8_t)sq_idx;
             if (j_seq[sq_idx] != J_SEQ_REST) {
                 sq_cur = j_seq[sq_idx];
-                trig_on(sq_cur, j_seq_vel[sq_idx]);
+                gon(sq_cur, j_seq_vel[sq_idx]);
                 sq_gate = 1;
             }
             sq_idx++;
         } else if (sq_gate && sq_t >= len * 0.5f) {
             if (sq_cur >= 0)
-                trig_off(sq_cur);
+                goff(sq_cur);
             sq_cur = -1;
             sq_gate = 0;
         }

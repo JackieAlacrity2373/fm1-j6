@@ -35,7 +35,7 @@ static uint8_t patch_dirty;              /* the live sound differs from its memo
 /* ------------------------------------------------------------- parameters --- */
 typedef struct {
     const char *name;                    /* NULL: nothing here */
-    uint8_t base;                        /* 0 j_p, 1 j_g (unsigned), 2 j_g (signed) */
+    uint8_t base;                        /* 0 j_p, 1 j_g (unsigned), 2 j_g (signed), 3 settings, 4 the USB link */
     uint8_t off;
     int8_t min, max;
     const char *const *lab;              /* names for the values, or NULL: the number */
@@ -50,6 +50,8 @@ static const char *const L_CHO[] = {"OFF", "I", "II", "I+II"};
 static const char *const L_MODE[] = {"POLY", "UNISON", "SOLO"};
 static const char *const L_ARP[] = {"UP", "DOWN", "UP/DN"};
 static const char *const L_THEME[] = {"GREEN", "AMBER", "CYAN", "RED", "MONO", "JUNO"};
+static const char *const L_LINK[] = {"OFF", "HOST"};
+static uint8_t link_on;                  /* the USB port plays host to another FM-1 (or a synth); never saved: boot is a device */
 
 #define P(n, f, mx) {n, 0, (uint8_t)offsetof(j_patch_t, f), 0, mx, 0}
 #define PL(n, f, mx, l) {n, 0, (uint8_t)offsetof(j_patch_t, f), 0, mx, l}
@@ -78,7 +80,7 @@ static const page_t PAGE[NPAGE] = {
                     {"ARP", 1, (uint8_t)offsetof(j_global_t, arp_mode), 0, 2, L_ARP},
                     {"OCTAVES", 1, (uint8_t)offsetof(j_global_t, arp_range), 1, 3, 0}},
                    {{"TEMPO", 1, (uint8_t)offsetof(j_global_t, arp_rate), 0, 127, 0},
-                    {"THEME", 3, (uint8_t)offsetof(settings_t, theme), 0, 5, L_THEME}, {0}, {0}}}},
+                    {"THEME", 3, (uint8_t)offsetof(settings_t, theme), 0, 5, L_THEME}, {"LINK", 4, 0, 0, 1, L_LINK}, {0}}}},
 };
 
 static int pget(const prm_t *q)
@@ -89,6 +91,8 @@ static int pget(const prm_t *q)
         return ((const uint8_t *)&j_g)[q->off];
     if (q->base == 3)
         return ((const uint8_t *)&set)[q->off];
+    if (q->base == 4)
+        return link_on;
     return ((const int8_t *)&j_g)[q->off];
 }
 
@@ -101,6 +105,8 @@ static void pset(const prm_t *q, int v)
         ((uint8_t *)&j_g)[q->off] = (uint8_t)v;
     else if (q->base == 3)
         ((uint8_t *)&set)[q->off] = (uint8_t)v;
+    else if (q->base == 4)
+        link_on = (uint8_t)v;
     else
         ((int8_t *)&j_g)[q->off] = (int8_t)v;
 }
@@ -188,6 +194,23 @@ void app_render(int32_t *lr, uint32_t n, uint32_t master_q12)
 void app_panic(void) { j_silence(); }
 void app_overload(void) { j_shed(); }
 
+/* The link: a note the arpeggiator or sequencer plays goes to the other FM-1 on channel 1 (keys played by hand
+ * go from input()). A note-on needs room for its note-off */
+static void link_tx(uint8_t st, uint8_t note, uint8_t vel)
+{
+    if (!link_on)
+        return;
+    if (st == 0x90u && plat_midi_out_room(TO_USB) < 4u)
+        return;
+    plat_midi_send((uint32_t)(st >> 4) | (uint32_t)st << 8 | (uint32_t)note << 16 | (uint32_t)vel << 24, TO_USB);
+}
+
+static void link_all_off(void)           /* CC 123 */
+{
+    if (link_on)
+        plat_midi_send(0x0Bu | 0xB0u << 8 | 123u << 16, TO_USB);
+}
+
 /* --------------------------------------------------------------- settings --- */
 static uint8_t cur;                      /* the memory in use */
 
@@ -255,6 +278,7 @@ void app_init(void)
 {
     uint32_t i;
     j_init();
+    j_tx = link_tx;
     if (plat_store_load(OBJ_SETTINGS, &set, sizeof set) != (int)sizeof set || set.magic != SET_MAGIC ||
         set.octave < -2 || set.octave > 2 || set.patch >= J_NPATCH || set.tune < -50 || set.tune > 50 ||
         set.vel > 127u || set.arp_mode >= J_NARP || set.arp_range < 1u || set.arp_range > 3u || set.arp_rate > 127u ||
@@ -381,10 +405,12 @@ static void param_turn(uint32_t k, int32_t e)    /* K1..K4 */
     pset(q, pget(q) + e * step);
     if (q->base == 0)
         patch_dirty = 1;
-    else
+    else if (q->base != 4)
         set_dirty = 1;
     if (q->base == 3)
         palette_set(set.theme);
+    if (q->base == 4)
+        plat_usb_host(link_on);
     prm_text(q, t);
     app_say(q->name, t);
 }
@@ -413,7 +439,8 @@ static void input(void)
             ui.knote[k] = (int8_t)note;
             ui.last_note = note;
             j_post(0x90u, (uint8_t)note, (uint8_t)v);
-            plat_midi_send(0x09u | 0x90u << 8 | (uint32_t)note << 16 | v << 24, TO_USB);
+            if (!(link_on && j_arp_on))      /* the arpeggiator reports its own notes */
+                plat_midi_send(0x09u | 0x90u << 8 | (uint32_t)note << 16 | v << 24, TO_USB);
         } else if (!(keys & bit) && (ui.keys & bit)) {
             int32_t note = ui.knote[k];
             ui.prs[k] = 0;
@@ -441,6 +468,7 @@ static void input(void)
                 if (ui.btn & oc)
                     set.octave = ui.oct_prev;
                 j_cmd(J_CMD_PANIC, 0);
+                link_all_off();
                 app_say("PANIC", "");
             } else {
                 if (!(ui.btn & oc))
@@ -587,6 +615,8 @@ static void draw_status(void)
     cv_text(8, 95, &FONT_XS, j_arp_on ? "ARP ON" : "ARP OFF", j_arp_on ? C_HI : C_DIM);
     cv_text(8, 110, &FONT_XS, j_hold ? "HOLD ON" : "HOLD OFF", j_hold ? C_HI : C_DIM);
     cv_text(110, 80, &FONT_XS, L_MODE[j_p.mode % J_NMODE], C_HI);
+    if (plat_usb_host_state() != USBH_OFF)
+        cv_text(200, 80, &FONT_XS, "LINK", plat_usb_host_state() == USBH_CONNECTED ? C_HI : C_DIM);
     cv_text(110, 95, &FONT_XS, "CHORUS", C_GRAY);
     cv_text(150, 95, &FONT_XS, L_CHO[j_p.chorus % J_NCHO], C_HI);
     cv_text(110, 110, &FONT_XS, "SEQ", C_GRAY);
@@ -726,11 +756,32 @@ void app_ui_init(void)
 
 void app_frame(void)
 {
-    static uint32_t last_pct, last_v, last_arp, last_seq;
+    static uint32_t last_pct, last_v, last_arp, last_seq, last_host;
     uint32_t now = plat_ms(), pct = plat_master() * 100u / 4096u, i, any = 0;
     uint32_t seq_state = j_seq_on | j_seq_rec << 1 | (uint32_t)j_seq_pos << 2 | (uint32_t)j_seq_n << 8;
     input();
     ann_tick(now);
+    switch (plat_usb_host_msg()) {
+    case USBH_MSG_ON: app_say("LINK", "LOOKING"); break;
+    case USBH_MSG_OFF: app_say("LINK", "OFF"); break;
+    case USBH_MSG_MIDI:
+        link_all_off();
+        app_say("LINK", "CONNECTED");
+        break;
+    case USBH_MSG_NOMIDI: app_say("LINK", "NO MIDI"); break;
+    case USBH_MSG_LOW: app_say("LINK", "NEEDS POWER"); break;
+    case USBH_MSG_LOST: app_say("LINK", "LOST"); break;
+    default: break;
+    }
+    if (plat_usb_lost())
+        j_cmd(J_CMD_PANIC, 0);
+    {
+        uint32_t hs = (uint32_t)plat_usb_host_state();
+        if (hs != last_host) {
+            last_host = hs;
+            ui.redraw = 1;
+        }
+    }
     for (i = 0; i < NE; i++)
         if (ui.turned_at[i] && now - ui.turned_at[i] < 400u)
             any = 1;
@@ -775,6 +826,8 @@ int app_expect(const char *what, int *got)
         *got = j_seq_on;
     else if (!strcmp(what, "rec"))
         *got = j_seq_rec;
+    else if (!strcmp(what, "link"))
+        *got = link_on;
     else if (!strcmp(what, "theme"))
         *got = set.theme;
     else if (!strcmp(what, "cutoff"))

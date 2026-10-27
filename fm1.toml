@@ -5,6 +5,7 @@ usb_product = "J6 FM-1"
 o2 = ["juno.c"]
 words = "words.tsv"
 vendored = ["fm1-base", "shim", "tests", "web"]
+usb_host = true
 ble = false
 ble_central = false
 tagline = "a six-voice JUNO-60 style synth for the FM-1"

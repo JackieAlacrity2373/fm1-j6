@@ -106,3 +106,16 @@ reboot
 wait 600
 expect seqn 4
 expect theme 4
+
+# the link is never saved, and with it on the sequencer's notes go out over USB
+expect link 0
+tap GLO
+tap GLO
+turn K3 1
+wait 30
+expect link 1
+tap SEQ
+wait 1200
+tap SEQ
+wait 100
+expect seq 0
