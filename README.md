@@ -56,8 +56,8 @@ with class-compliant USB-MIDI, for example [S1Vave](https://github.com/AndrewGG8
 - Host mode is new and has had limited testing on real hardware.
 
 ## Install
-Download `j6-1.2.0.fwsc` from the [releases](../../releases) and install it with the
-[Firmware Hub](https://thefirmwarehub.com) installer or `python fm1-base/tools/fm1_install.py j6-1.2.0.fwsc`.
+Download `j6-1.3.0.fwsc` from the [releases](../../releases) and install it with the
+[Firmware Hub](https://thefirmwarehub.com) installer or `python fm1-base/tools/fm1_install.py j6-1.3.0.fwsc`.
 The package carries the felucca update loader, so you can leave J6 by installing any other FM-1 firmware the same way.
 Flashing custom firmware is at your own risk.
 
@@ -75,11 +75,11 @@ On Windows with MinGW see `shim/`: `set PYTHONPATH=shim`, `set CC=shim\cc.bat`.
 
 Engine test (levels, NaN, voice counts, CPU), then `python tests/analyze.py OUT` for spectra:
 ```
-gcc -O2 -ffp-contract=off -I fm1-base/include -o engine_test tests/engine_test.c juno.c -lm
+gcc -O2 -ffp-contract=off -I fm1-base/include -o engine_test tests/engine_test.c src/juno.c -lm
 ```
 
 Firmware, Linux: set `JIELI_TOOLCHAIN` and `AC79_SDK` (see `fm1-base/README.md`), then `./build.sh` → `build/j6.fwsc`
-(`./build.sh --release 1.2.0` → `build/j6-1.2.0.fwsc`, identity `FM-1_66010200`).
+(`./build.sh --release 1.3.0` → `build/j6-1.3.0.fwsc`, identity `FM-1_66010300`).
 Windows: Docker Desktop, then `.\build_device.ps1` (see the script header for the toolchain layout).
 Pushing a `vX.Y.Z` tag builds, signs and releases through GitHub Actions.
 

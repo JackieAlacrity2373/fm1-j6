@@ -1,12 +1,12 @@
 /* Engine test: renders scenes of the J6 engine to WAV files and checks them (no platform needed).
- *   gcc -O2 -ffp-contract=off -I ../fm1-base/include -o engine_test engine_test.c ../juno.c -lm
+ *   gcc -O2 -ffp-contract=off -I ../fm1-base/include -o engine_test engine_test.c ../src/juno.c -lm
  *   engine_test OUTDIR     then analyze.py OUTDIR for the spectra */
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "../juno.h"
+#include "../src/juno.h"
 
 static int fails;
 #define CHECK(c, ...) do { if (!(c)) { fails++; printf("FAIL: " __VA_ARGS__); printf("\n"); } else { printf("  ok: " __VA_ARGS__); printf("\n"); } } while (0)
