@@ -4,6 +4,8 @@ A six-voice polysynth after the Roland JUNO-60 for the M-VAVE FM-1, built on
 [fm1-base](https://github.com/charlesvestal/fm1-base) (MPL-2.0) and [felucca-bsp](https://github.com/hugelton/felucca-bsp).
 Independent project, not affiliated with Roland. The sound is an approximation, not a circuit model.
 
+**New to J6? Read the [beginner's guide](docs/GUIDE.md).**
+
 ![J6 screen](docs/screen.png)
 
 ## Features
@@ -23,7 +25,7 @@ Independent project, not affiliated with Roland. The sound is an approximation, 
 | Control | Action |
 |---|---|
 | HOME | status page (sound name, mode, arp / hold / seq state, 16-step pattern strip) |
-| EDIT / SEL / ENV / LFO / FX / GLO | pages DCO, VCF+HPF, envelope, LFO, chorus+mode+porta, global. Press the button again for the page's second half; GLO has three |
+| EDIT / SEL / ENV / LFO / FX / GLO | pages DCO, VCF+HPF, envelope, LFO, chorus+mode+porta, global. Press the button again for the page's second half; DCO, VCF and GLO have two |
 | K1..K4 | the four values shown |
 | SELECT encoder | flip a page's halves |
 | PRESET / ALGO encoders | memory ±1 / ±8 |
