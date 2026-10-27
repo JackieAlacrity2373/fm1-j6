@@ -17,7 +17,7 @@ Independent project, not affiliated with Roland. The sound is an approximation, 
 - **Recorder / sequencer:** 16 steps with rests, tempo follows the ARP rate, saved with SAVE
 - **Memories:** 56 (16 factory sounds, the rest INIT), stored in flash; MIDI program change selects
 - **MIDI:** note, velocity, pitch bend, mod wheel (CC1), sustain (CC64), channel pressure, program change
-- **UI:** page tabs, five colour themes (GREEN, AMBER, CYAN, RED, MONO), status page with a pattern strip
+- **UI:** page tabs, six colour themes (JUNO blue by default, GREEN, AMBER, CYAN, RED, MONO), status page with a pattern strip
 
 ## Controls
 | Control | Action |
@@ -38,8 +38,8 @@ Independent project, not affiliated with Roland. The sound is an approximation, 
 GLO page 2 holds TEMPO (the arp/sequence rate) and THEME.
 
 ## Install
-Download `j6-x.y.z.fwsc` from the [releases](../../releases) and install it with the
-[Firmware Hub](https://thefirmwarehub.com) installer or `python fm1-base/tools/fm1_install.py j6-x.y.z.fwsc`.
+Download `j6-1.1.0.fwsc` from the [releases](../../releases) and install it with the
+[Firmware Hub](https://thefirmwarehub.com) installer or `python fm1-base/tools/fm1_install.py j6-1.1.0.fwsc`.
 The package carries the felucca update loader, so you can leave J6 by installing any other FM-1 firmware the same way.
 Flashing custom firmware is at your own risk.
 
@@ -61,7 +61,7 @@ gcc -O2 -ffp-contract=off -I fm1-base/include -o engine_test tests/engine_test.c
 ```
 
 Firmware, Linux: set `JIELI_TOOLCHAIN` and `AC79_SDK` (see `fm1-base/README.md`), then `./build.sh` → `build/j6.fwsc`
-(`./build.sh --release 1.0.0` → `build/j6-1.0.0.fwsc`, identity `FM-1_66010000`).
+(`./build.sh --release 1.1.0` → `build/j6-1.1.0.fwsc`, identity `FM-1_66010100`).
 Windows: Docker Desktop, then `.\build_device.ps1` (see the script header for the toolchain layout).
 Pushing a `vX.Y.Z` tag builds, signs and releases through GitHub Actions.
 

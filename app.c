@@ -49,7 +49,7 @@ static const char *const L_VCA[] = {"ENV", "GATE"};
 static const char *const L_CHO[] = {"OFF", "I", "II", "I+II"};
 static const char *const L_MODE[] = {"POLY", "UNISON", "SOLO"};
 static const char *const L_ARP[] = {"UP", "DOWN", "UP/DN"};
-static const char *const L_THEME[] = {"GREEN", "AMBER", "CYAN", "RED", "MONO"};
+static const char *const L_THEME[] = {"GREEN", "AMBER", "CYAN", "RED", "MONO", "JUNO"};
 
 #define P(n, f, mx) {n, 0, (uint8_t)offsetof(j_patch_t, f), 0, mx, 0}
 #define PL(n, f, mx, l) {n, 0, (uint8_t)offsetof(j_patch_t, f), 0, mx, l}
@@ -78,7 +78,7 @@ static const page_t PAGE[NPAGE] = {
                     {"ARP", 1, (uint8_t)offsetof(j_global_t, arp_mode), 0, 2, L_ARP},
                     {"OCTAVES", 1, (uint8_t)offsetof(j_global_t, arp_range), 1, 3, 0}},
                    {{"TEMPO", 1, (uint8_t)offsetof(j_global_t, arp_rate), 0, 127, 0},
-                    {"THEME", 3, (uint8_t)offsetof(settings_t, theme), 0, 4, L_THEME}, {0}, {0}}}},
+                    {"THEME", 3, (uint8_t)offsetof(settings_t, theme), 0, 5, L_THEME}, {0}, {0}}}},
 };
 
 static int pget(const prm_t *q)
@@ -236,7 +236,7 @@ static void settings_defaults(void)
     set.arp_mode = J_ARP_UP;
     set.arp_range = 1;
     set.arp_rate = 80;
-    set.theme = 1;
+    set.theme = 5;
     set.seq_n = 0;
 }
 
@@ -258,7 +258,7 @@ void app_init(void)
     if (plat_store_load(OBJ_SETTINGS, &set, sizeof set) != (int)sizeof set || set.magic != SET_MAGIC ||
         set.octave < -2 || set.octave > 2 || set.patch >= J_NPATCH || set.tune < -50 || set.tune > 50 ||
         set.vel > 127u || set.arp_mode >= J_NARP || set.arp_range < 1u || set.arp_range > 3u || set.arp_rate > 127u ||
-        set.theme > 4u || !seq_ok())
+        set.theme > 5u || !seq_ok())
         settings_defaults();
     if (plat_store_load(OBJ_PATCH, &bank, sizeof bank) != (int)sizeof bank || bank.magic != BANK_MAGIC)
         bank_defaults();
@@ -619,6 +619,8 @@ static void draw(void)
     const page_t *pg = &PAGE[ui.page];
     static const uint8_t WK[16] = PLAT_WHITE_KEYS, BK[11] = PLAT_BLACK_KEYS;
     cv_begin(240, 32, C_BLACK);
+    if (set.theme == 5u)
+        cv_rect(0, 0, 240, 28, RGB(0, 108, 171));   /* the JUNO theme's blue banner */
     if (now < ui.msg_until) {
         int32_t x = cv_text(10, 6, &FONT_B, ui.msg[0], C_WHITE);
         cv_text(x + 8, 6, &FONT_B, ui.msg[1], C_HI);

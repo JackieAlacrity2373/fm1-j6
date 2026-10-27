@@ -96,13 +96,13 @@ expect octave 1
 # the theme
 tap GLO
 tap GLO
-turn K2 1
+turn K2 -1
 wait 30
-expect theme 2
+expect theme 4
 shot theme.png
 tap SAVE
 wait 100
 reboot
 wait 600
 expect seqn 4
-expect theme 2
+expect theme 4

@@ -42,6 +42,7 @@ static const palette_t PALETTES[] = {
     {"CYAN", {NEUTRALS, RGB(60, 180, 235), RGB(150, 225, 255)}},
     {"RED", {NEUTRALS, RGB(232, 76, 60), RGB(255, 132, 112)}},
     {"MONO", {NEUTRALS, RGB(196, 196, 202), RGB(236, 236, 240)}},
+    {"JUNO", {NEUTRALS, RGB(40, 160, 225), RGB(200, 236, 255)}},
 };
 #define NPALETTES (sizeof(PALETTES) / sizeof(PALETTES[0]))
 static uint16_t pal[5];
