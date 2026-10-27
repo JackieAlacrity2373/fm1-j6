@@ -1,0 +1,108 @@
+# J6 in the host simulator:  python fm1-base\tools\build.py . --host   then
+#   build\host\J6_host tests\basic.txt build\host
+wait 600
+shot boot.png
+expect patch 0
+expect voices 0
+key 7 down 100
+wait 300
+expect voices 1
+expect note 60
+shot play.png
+key 7 up
+wait 50
+turn PRESET 2
+wait 30
+expect patch 2
+tap SEL
+wait 30
+expect page 2
+turn K1 -5
+wait 30
+expect dirty 3
+shot vcf.png
+tap ENV
+wait 30
+shot env.png
+tap EDIT
+tap EDIT
+wait 30
+expect sub 1
+tap GLO
+turn K1 4
+wait 30
+expect tune 8
+tap ARP
+wait 100
+expect arp 1
+tap ARP
+wait 100
+expect arp 0
+tap OCT+
+wait 30
+expect octave 1
+tap FX
+turn K2 1
+wait 30
+expect mode 1
+shot fx.png
+tap SAVE
+wait 100
+expect dirty 0
+wav chord.wav
+key 3 down 90
+key 7 down 90
+key 10 down 90
+wait 1500
+shot chord.png
+key 3 up
+key 7 up
+key 10 up
+wait 800
+wavstop
+reboot
+wait 600
+expect patch 2
+expect octave 1
+expect tune 8
+
+
+# sequencer: REC, three notes and a rest, SEQ plays; the panic chord stops it
+tap HOME
+tap REC
+wait 50
+expect rec 1
+tapkey 3
+tapkey 7
+tap ARP
+tapkey 10
+wait 50
+tap REC
+wait 50
+expect rec 0
+expect seqn 4
+tap SEQ
+wait 1500
+expect seq 1
+shot seq.png
+press OCT-
+press OCT+
+wait 100
+release OCT-
+release OCT+
+wait 100
+expect seq 0
+expect octave 1
+# the theme
+tap GLO
+tap GLO
+turn K2 1
+wait 30
+expect theme 2
+shot theme.png
+tap SAVE
+wait 100
+reboot
+wait 600
+expect seqn 4
+expect theme 2

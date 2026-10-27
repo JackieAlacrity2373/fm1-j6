@@ -1,0 +1,14 @@
+name = "J6"
+id_prefix = "FM-1_66"
+usb_manufacturer = "J6"
+usb_product = "J6 FM-1"
+o2 = ["juno.c"]
+words = "words.tsv"
+vendored = ["fm1-base", "shim", "tests", "web"]
+ble = false
+ble_central = false
+tagline = "a six-voice JUNO-60 style synth for the FM-1"
+repo = "https://github.com/JackieAlacrity2373/fm1-j6"
+licence = "MPL-2.0"
+credits = "an independent project, not affiliated with Roland; built on fm1-base"
+
