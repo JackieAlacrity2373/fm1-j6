@@ -78,8 +78,8 @@ Web MIDI only works on `https://` pages or `localhost`, so don't open `index.htm
 To host your own copy, serve the `editor/` folder from any static web host over HTTPS.
 
 ## Install
-Download `j6-1.3.1.fwsc` from the [releases](../../releases) and install it with the
-[Firmware Hub](https://thefirmwarehub.com) installer or `python fm1-base/tools/fm1_install.py j6-1.3.1.fwsc`.
+Download `j6-1.4.0.fwsc` from the [releases](../../releases) and install it with the
+[Firmware Hub](https://thefirmwarehub.com) installer or `python fm1-base/tools/fm1_install.py j6-1.4.0.fwsc`.
 The package carries the felucca update loader, so you can leave J6 by installing any other FM-1 firmware the same way.
 Flashing custom firmware is at your own risk.
 
@@ -105,7 +105,7 @@ Web editor (a static page; Chrome, Edge or Opera): `python -m http.server 8080 -
 `python tests/editor_test.py` checks that the firmware, the editor and `docs/MIDI_CC.md` agree.
 
 Firmware, Linux: set `JIELI_TOOLCHAIN` and `AC79_SDK` (see `fm1-base/README.md`), then `./build.sh` → `build/j6.fwsc`
-(`./build.sh --release 1.3.1` → `build/j6-1.3.1.fwsc`, identity `FM-1_66010301`).
+(`./build.sh --release 1.4.0` → `build/j6-1.4.0.fwsc`, identity `FM-1_66010400`).
 Windows: Docker Desktop, then `.\build_device.ps1` (see the script header for the toolchain layout).
 Pushing a `vX.Y.Z` tag builds, signs and releases through GitHub Actions.
 
