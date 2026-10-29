@@ -166,7 +166,10 @@ static void prm_text(const prm_t *q, char *t)
 
 /* ------------------------------------------------------------ the engine --- */
 static volatile int16_t pc_pending = -1;        /* a MIDI program change waiting for the main loop */
+static volatile int8_t theme_pending = -1;      /* CC 111: a theme waiting for the main loop (the screen is drawn there) */
 static volatile uint32_t midi_count;
+
+#define CC_THEME 111u
 
 static void midi_in(void)                       /* the render context: the packets that came in */
 {
@@ -179,6 +182,8 @@ static void midi_in(void)                       /* the render context: the packe
         midi_count++;
         if ((st & 0xF0u) == 0xC0u)
             pc_pending = (int16_t)(d1 % J_NPATCH);
+        else if ((st & 0xF0u) == 0xB0u && d1 == CC_THEME)
+            theme_pending = (int8_t)(d2 > 5u ? 5u : d2);
         else
             j_event((uint8_t)st, (uint8_t)d1, (uint8_t)d2);
     }
@@ -229,6 +234,25 @@ static void bank_defaults(void)
     bank.magic = BANK_MAGIC;
     for (i = 0; i < J_NPATCH; i++)
         j_factory(i, &bank.p[i]);
+}
+
+/* A bank saved by an older build has INIT in the slots the factory list has since filled: fill those, keep the rest */
+static void bank_fill_empty(void)
+{
+    int i;
+    uint32_t k;
+    j_patch_t init, fac;
+    j_default_patch(&init);
+    for (i = 0; i < J_NPATCH; i++) {
+        const uint8_t *a = (const uint8_t *)&bank.p[i], *b = (const uint8_t *)&init;
+        int same = 1;
+        for (k = 0; k < sizeof init; k++)
+            same &= a[k] == b[k];
+        if (!same)
+            continue;
+        j_factory(i, &fac);
+        pcopy(&bank.p[i], &fac);
+    }
 }
 
 static void load_patch(int i)
@@ -286,6 +310,9 @@ void app_init(void)
         settings_defaults();
     if (plat_store_load(OBJ_PATCH, &bank, sizeof bank) != (int)sizeof bank || bank.magic != BANK_MAGIC)
         bank_defaults();
+    else
+        bank_fill_empty();
+    globals_from_settings();
     globals_from_settings();
     for (i = 0; i < set.seq_n; i++) {
         j_seq[i] = set.seq[i];
@@ -428,6 +455,12 @@ static void input(void)
         pc_pending = -1;
         load_patch(pc);
         say_patch();
+    }
+    if (theme_pending >= 0) {
+        set.theme = (uint8_t)theme_pending;
+        theme_pending = -1;
+        set_dirty = 1;
+        palette_set(set.theme);
     }
     for (k = 0; k < NKEYS; k++) {
         uint32_t bit = 1u << k;

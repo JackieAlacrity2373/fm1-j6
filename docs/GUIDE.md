@@ -9,7 +9,7 @@ built from a few simple parts (see section 4), and you shape it with four knobs 
 ## 2. First sound
 1. Power on. The **HOME** page shows the sound name and four main settings.
 2. Touch the keys. Left is lower, right is higher. Pressing harder makes a note louder and adds a little vibrato.
-3. Turn the **PRESET** encoder to try other sounds (16 factory sounds; the remaining 40 memories are empty "INIT").
+3. Turn the **PRESET** encoder to try other sounds (56 factory sounds).
 4. Turn **K1..K4** to change what you hear: on HOME they are CUTOFF (brightness), RES (resonance), ATTACK and RELEASE.
 5. Press **SAVE** to keep the sound. The SAVE light means something has changed and is not saved yet.
 
@@ -121,7 +121,14 @@ Good to know:
 
 ## 8. MIDI
 Over USB from a computer or keyboard, J6 responds to notes, velocity, pitch bend, the mod wheel (CC1), sustain pedal
-(CC64), channel pressure and program change (selects a memory).
+(CC64), channel pressure and program change (selects a memory). Every control on the screen also has a CC, and the
+arpeggiator, sequencer and hold can be switched by CC. The full chart is in [MIDI_CC.md](MIDI_CC.md).
+
+A browser editor with a knob for each control is in the `editor/` folder: serve it with
+`python -m http.server 8080 -d editor`, open <http://localhost:8080/> in Chrome, Edge or Opera, press **Connect MIDI**
+and pick the FM-1. It runs on the computer only. What you change with it is the live sound: press **SAVE** on the FM-1
+to keep it. If you had saved memories before the factory list grew, the memories that were still INIT now hold the new
+sounds.
 
 ## 9. Saving, and what is kept
 **SAVE** stores the current sound, your settings (octave, tuning, theme and so on) and the sequencer pattern. J6 keeps only

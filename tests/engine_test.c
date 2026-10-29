@@ -214,6 +214,35 @@ int main(int argc, char **argv)
         printf("  10 s of audio in %.3f s of host time (x%.0f realtime)\n", secs, 10.0f / secs);
     }
 
+    printf("MIDI CC map (docs/MIDI.md)\n");
+    scene_begin();
+    j_default_patch(&j_p);
+    {
+        static const struct { uint8_t cc, val, want; const uint8_t *p; } T[] = {
+            {74, 99, 99, &j_p.cutoff}, {21, 33, 33, &j_p.saw}, {22, 44, 44, &j_p.pulse}, {23, 55, 55, &j_p.sub},
+            {24, 66, 66, &j_p.noise}, {20, 127, 2, &j_p.range}, {26, 127, 1, &j_p.pwm_src}, {31, 127, 3, &j_p.hpf},
+            {93, 127, 3, &j_p.chorus}, {80, 127, 2, &j_p.mode}, {86, 127, 12, &j_p.bend}, {30, 1, 1, &j_p.vca_mode},
+            {29, 1, 1, &j_p.env_pol}, {27, 77, 77, &j_p.env_amt}, {28, 88, 88, &j_p.kbd}, {85, 12, 12, &j_p.detune},
+            {25, 70, 70, &j_p.pw}, {104, 127, 2, &j_g.arp_mode}, {105, 0, 1, &j_g.arp_range}, {105, 127, 3, &j_g.arp_range},
+        };
+        unsigned t;
+        for (t = 0; t < sizeof T / sizeof T[0]; t++) {
+            j_event(0xB0, T[t].cc, T[t].val);
+            CHECK(*T[t].p == T[t].want, "CC %d = %d -> %d", T[t].cc, T[t].val, *T[t].p);
+        }
+        j_event(0xB0, 102, 0);
+        CHECK(j_g.tune == -50, "CC 102 = 0 -> tune %d", j_g.tune);
+        j_event(0xB0, 102, 127);
+        CHECK(j_g.tune == 50, "CC 102 = 127 -> tune %d", j_g.tune);
+        j_event(0xB0, 102, 50);
+        CHECK(j_g.tune == 0, "CC 102 = 50 -> tune %d", j_g.tune);
+        j_event(0xB0, 107, 127);
+        run(0.05f);
+        CHECK(j_arp_on == 1, "CC 107 turns the arpeggiator on");
+        j_event(0xB0, 107, 0);
+        CHECK(j_arp_on == 0, "CC 107 turns the arpeggiator off");
+    }
+
     printf("%s\n", fails ? "FAILED" : "all passed");
     return fails != 0;
 }

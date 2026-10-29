@@ -17,9 +17,41 @@ Independent project, not affiliated with Roland. The sound is an approximation, 
 - **Play modes:** Poly, Unison (with spread), Solo; portamento; bend range; hold
 - **Arpeggiator:** up / down / up-down, 1-3 octaves, rate
 - **Recorder / sequencer:** 16 steps with rests, tempo follows the ARP rate, saved with SAVE
-- **Memories:** 56 (16 factory sounds, the rest INIT), stored in flash; MIDI program change selects
-- **MIDI:** note, velocity, pitch bend, mod wheel (CC1), sustain (CC64), channel pressure, program change
+- **Memories:** 56, all factory sounds (brass, strings, pads, keys, basses, leads, organs, effects), stored in flash; MIDI program change selects. A unit that already has a saved bank gets the new sounds only in memories it still holds as INIT
+- **MIDI:** notes, velocity, pitch bend, channel pressure, program change and a CC for every control (see [docs/MIDI_CC.md](docs/MIDI_CC.md))
+- **Web editor:** [editor/](editor/) is a browser page with knobs for every parameter over Web MIDI; it runs on your computer, not on the FM-1
 - **UI:** page tabs, six colour themes (JUNO blue by default, GREEN, AMBER, CYAN, RED, MONO), status page with a pattern strip
+
+## MIDI
+J6 answers to USB-MIDI notes, velocity, pitch bend, channel pressure, program change (memory 1–56) and a control change for
+every parameter. The full chart with ranges and values is the [MIDI CC Implementation Chart](docs/MIDI_CC.md).
+
+| Section | CCs |
+|---|---|
+| Performance | **1** mod wheel, **64** sustain, **120** all sound off, **121** reset controllers, **123** all notes off |
+| DCO | **20** range, **21** saw, **22** pulse, **23** sub, **24** noise, **25** pulse width, **26** PWM source |
+| VCF / HPF / VCA | **74** cutoff, **71** resonance, **27** env amount, **28** key follow, **29** env polarity, **30** VCA mode, **31** HPF, **7** level |
+| Envelope | **73** attack, **75** decay, **70** sustain, **72** release |
+| LFO | **76** rate, **77** delay, **78** to DCO, **79** to VCF |
+| Voice | **80** mode, **5** portamento, **85** unison spread, **86** bend range, **93** chorus |
+| Global | **102** tune, **103** velocity, **104–106** arp direction / octaves / tempo, **107–110** arp, seq play, seq record, hold, **111** screen theme |
+
+The FM-1 only receives MIDI, and there is no SysEx. Build your own front end from the chart, or use the web editor below.
+
+## Web editor
+[editor/](editor/) is a static browser page with a knob for every parameter, performance controls, a keyboard, the
+56 factory sounds and a local sound library. It talks to the FM-1 over Web MIDI (Chrome, Edge or Opera) and runs on
+your computer; nothing is installed on the FM-1. See [docs/MIDI_CC.md](docs/MIDI_CC.md#10-using-the-editor).
+
+**Open it online: https://jackiealacrity2373.github.io/fm1-j6/** (hosted free by GitHub Pages from `editor/`).
+
+**Run it locally instead** (no internet needed; Python 3 required):
+1. Open a terminal in the repository folder.
+2. Run `python -m http.server 8080 -d editor`
+3. Browse to <http://localhost:8080> in Chrome, Edge or Opera and click **Connect MIDI**.
+
+Web MIDI only works on `https://` pages or `localhost`, so don't open `index.html` by double-clicking it.
+To host your own copy, serve the `editor/` folder from any static web host over HTTPS.
 
 ## Controls
 | Control | Action |
@@ -73,10 +105,14 @@ build/host/j6_host tests/basic.txt build/host     # runs the script, writes scre
 ```
 On Windows with MinGW see `shim/`: `set PYTHONPATH=shim`, `set CC=shim\cc.bat`.
 
-Engine test (levels, NaN, voice counts, CPU), then `python tests/analyze.py OUT` for spectra:
+Engine test (levels, NaN, voice counts, CPU, MIDI CC map), then `python tests/analyze.py OUT` for spectra:
 ```
 gcc -O2 -ffp-contract=off -I fm1-base/include -o engine_test tests/engine_test.c src/juno.c -lm
 ```
+
+Web editor (a static page; Chrome, Edge or Opera): `python -m http.server 8080 -d editor`, then open
+<http://localhost:8080/>. After changing the factory sounds in `src/juno.c`, run `python tools/gen_patches.py`;
+`python tests/editor_test.py` checks that the firmware, the editor and `docs/MIDI_CC.md` agree.
 
 Firmware, Linux: set `JIELI_TOOLCHAIN` and `AC79_SDK` (see `fm1-base/README.md`), then `./build.sh` → `build/j6.fwsc`
 (`./build.sh --release 1.3.1` → `build/j6-1.3.1.fwsc`, identity `FM-1_66010301`).

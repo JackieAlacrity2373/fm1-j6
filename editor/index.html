@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>J6 Editor</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>J6 <span>editor</span></h1>
+  <div class="conn">
+    <button id="connect" type="button">Connect MIDI</button>
+    <label>Output <select id="output"><option value="">(not connected)</option></select></label>
+    <label>Channel     <select id="channel"></select></label>
+    <label>Theme <select id="theme"></select></label>
+    <span id="status" role="status">MIDI not connected.</span>
+  </div>
+</header>
+
+<main>
+  <section class="card" id="sounds">
+    <h2>Sounds</h2>
+    <div class="row">
+      <input id="patch-name" maxlength="8" placeholder="NAME" aria-label="Sound name">
+      <button id="init" type="button" title="Load the INIT sound">Init</button>
+      <button id="random" type="button" title="Randomize the sound">Random</button>
+      <button id="send-all" type="button" title="Send every parameter to the FM-1">Send all</button>
+      <button id="save-local" type="button" title="Keep in this browser">Save here</button>
+      <button id="export" type="button">Export</button>
+      <label class="file">Import<input id="import" type="file" accept=".json,application/json"></label>
+    </div>
+    <h3>Factory</h3>
+    <div id="factory" class="patches"></div>
+    <h3>Saved in this browser</h3>
+    <div id="library"></div>
+    <h3>Device memory</h3>
+    <div class="row">
+      <button id="pc-prev" type="button" aria-label="Previous memory">◀</button>
+      <input id="program" type="number" min="1" max="56" value="1" aria-label="Memory 1 to 56">
+      <button id="pc-next" type="button" aria-label="Next memory">▶</button>
+      <button id="pc-send" type="button">Select (program change)</button>
+    </div>
+    <p class="hint">Clicking a factory sound sends its values as CCs: it changes the live sound only. Press SAVE on the FM-1 to keep it in a memory.</p>
+  </section>
+
+  <div class="stack">
+    <div id="panel"></div>
+    <section class="card">
+      <h2>Performance</h2>
+      <div id="perf"></div>
+    </section>
+    <section class="card">
+      <h2>Keys</h2>
+      <div class="row">
+        <button id="oct-down" type="button" aria-label="Octave down">−</button>
+        <span id="octave" class="oct"></span>
+        <button id="oct-up" type="button" aria-label="Octave up">+</button>
+        <label class="slider inline">Velocity <input id="velocity" type="range" min="1" max="127" value="100"></label>
+        <button id="panic" type="button" class="warn">Panic</button>
+      </div>
+      <div id="keys" class="keys"></div>
+      <p class="hint">Computer keys A W S E D F T G Y H U J K O L P ; play the keyboard.</p>
+    </section>
+    <section class="card">
+      <h2>MIDI monitor</h2>
+      <pre id="monitor" aria-live="off"></pre>
+    </section>
+  </div>
+</main>
+
+<script src="params.js"></script>
+<script src="patches.js"></script>
+<script src="editor.js"></script>
+</body>
+</html>
