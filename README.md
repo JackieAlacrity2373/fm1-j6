@@ -38,21 +38,6 @@ every parameter. The full chart with ranges and values is the [MIDI CC Implement
 
 The FM-1 only receives MIDI, and there is no SysEx. Build your own front end from the chart, or use the web editor below.
 
-## Web editor
-[editor/](editor/) is a static browser page with a knob for every parameter, performance controls, a keyboard, the
-56 factory sounds and a local sound library. It talks to the FM-1 over Web MIDI (Chrome, Edge or Opera) and runs on
-your computer; nothing is installed on the FM-1. See [docs/MIDI_CC.md](docs/MIDI_CC.md#10-using-the-editor).
-
-**Open it online: https://jackiealacrity2373.github.io/fm1-j6/** (hosted free by GitHub Pages from `editor/`).
-
-**Run it locally instead** (no internet needed; Python 3 required):
-1. Open a terminal in the repository folder.
-2. Run `python -m http.server 8080 -d editor`
-3. Browse to <http://localhost:8080> in Chrome, Edge or Opera and click **Connect MIDI**.
-
-Web MIDI only works on `https://` pages or `localhost`, so don't open `index.html` by double-clicking it.
-To host your own copy, serve the `editor/` folder from any static web host over HTTPS.
-
 ## Controls
 | Control | Action |
 |---|---|
@@ -69,23 +54,28 @@ To host your own copy, serve the `editor/` folder from any static web host over 
 | OCT- / OCT+ | octave; **both together = panic** (all notes off, stops the sequence and recording) |
 | Touch keys | the 27-key keyboard |
 
-GLO page 2 holds TEMPO (the arp/sequence rate), THEME and LINK.
+GLO page 2 holds TEMPO (the arp/sequence rate), and THEME.
 
-## LINK: drive a second FM-1 (beta)
-> **Beta feature.** LINK is new and under review with the S1Vave maintainer; behaviour may change in later releases.
+## Web editor
+A browser-based front end for J6, in [editor/](editor/). It is a static page that runs on your computer and talks to the
+FM-1 over Web MIDI (Chrome, Edge or Opera); nothing is installed on the FM-1.
+- A knob, switch or selector for every parameter: DCO, VCF/HPF, envelope, LFO, voice, chorus, arpeggiator and global settings
+- Performance controls (mod wheel, pitch bend, sustain, panic) and an on-screen keyboard
+- All 56 factory sounds, plus a local sound library with save, export and import
+- A theme picker (JUNO blue, GREEN, AMBER, CYAN, RED, MONO) that recolours the page and sets the screen theme on the FM-1 (CC 111)
+- Knobs: drag, mouse wheel or arrow keys; double-click resets
 
-Two FM-1s can be wired together over USB. Set **GLO page 2, K3 (LINK) to HOST** and the FM-1's USB port becomes a USB-MIDI
-**host**: whatever the arpeggiator and sequencer play (and the touch keys, when the arp is off) is also sent as MIDI
-notes on channel 1 to the other unit, which stays an ordinary USB device. The other FM-1 can run J6, or any firmware
-with class-compliant USB-MIDI, for example [S1Vave](https://github.com/AndrewGG88/S1Vave).
-- The FM-1 does not supply 5 V on its USB port in host mode: connect the two through a **powered USB hub or powered
-  adapter** (no nested hubs, no low-speed devices).
-- Only one side can be host. The other FM-1 must be in its normal device mode, with LINK off.
-- LINK is never saved, so J6 always boots as a device and the installer keeps working. In host mode there is no
-  computer on the port (no USB audio or installer): switch LINK off to go back.
-- The screen shows LINK (bright when connected). Panic and a lost cable send all-notes-off; notes that arrived over MIDI
-  and are then arpeggiated are forwarded too. MIDI clock is not sent yet.
-- Host mode is new and has had limited testing on real hardware.
+See [docs/MIDI_CC.md](docs/MIDI_CC.md#10-using-the-editor) for how it works and the full CC chart.
+
+**Open it online: https://jackiealacrity2373.github.io/fm1-j6/** (hosted free by GitHub Pages from `editor/`).
+
+**Run it locally instead** (no internet needed; Python 3 required):
+1. Open a terminal in the repository folder.
+2. Run `python -m http.server 8080 -d editor`
+3. Browse to <http://localhost:8080> in Chrome, Edge or Opera and click **Connect MIDI**.
+
+Web MIDI only works on `https://` pages or `localhost`, so don't open `index.html` by double-clicking it.
+To host your own copy, serve the `editor/` folder from any static web host over HTTPS.
 
 ## Install
 Download `j6-1.3.1.fwsc` from the [releases](../../releases) and install it with the
