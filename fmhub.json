@@ -1,4 +1,5 @@
 {
-  "what": "A six-voice JUNO-60 style polysynth with chorus, arpeggiator and a 16-step recorder.",
-  "kinds": ["synth"]
+  "what": "A six-voice JUNO-60 style polysynth with chorus, arpeggiator and a 16-step recorder. 56 factory sounds, a MIDI control for every knob, and a free browser editor that plays it over USB-MIDI.",
+  "kinds": ["synth"],
+  "editor": "https://jackiealacrity2373.github.io/fm1-j6/"
 }
