@@ -116,3 +116,5 @@ exact output level and the chorus / HPF values are by ear-of-the-spec, not measu
 ## Licence and credits
 MPL-2.0 (`LICENSE`). Built on fm1-base (Charles Vestal, Leo Kuroshita) and felucca-bsp, vendored here under their own
 MPL-2.0 licences. `fm1-base/tools/build.py` has one local change (POSIX container paths on Windows).
+
+You can also try J6 in the browser, no flashing needed, in the free community [FM-1 Emulator](https://fm1-emulator.atst.tools/).
