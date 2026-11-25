@@ -88,6 +88,9 @@ Second half:
 - **TEMPO:** speed of the arpeggiator and the sequencer.
 - **THEME:** screen colours: GREEN, AMBER, CYAN, RED, MONO or JUNO (blue, the default). Saved with SAVE.
 - **LINK:** see section 7.
+- **USB OUT:** the level sent to the computer over USB audio. MASTER (the default): it follows the MASTER
+  knob. FULL: the computer always gets the full level, and MASTER sets only the speaker and headphones, so you
+  can turn MASTER down and hear J6 only through your DAW. Saved with SAVE.
 
 ## 5. Playing helpers
 - **ARP:** hold some keys and press ARP. The notes you hold are played one after another. Press ARP again to stop.

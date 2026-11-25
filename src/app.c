@@ -22,7 +22,10 @@ typedef struct {
     uint8_t theme;                       /* the screen's palette */
     uint8_t seq_n;                       /* the recorded steps */
     uint8_t seq[J_SEQ_MAX], seq_vel[J_SEQ_MAX];
+    uint8_t usb_full;                    /* 1: USB audio at full level, MASTER for the speaker and headphones only
+                                          * (in the struct's tail padding: sizeof stays 48, old saves still load) */
 } settings_t;
+_Static_assert(sizeof(settings_t) == 48u, "settings_t keeps its saved size");
 static settings_t set;
 static uint8_t set_dirty;                /* the settings changed since the last save */
 
@@ -51,6 +54,7 @@ static const char *const L_MODE[] = {"POLY", "UNISON", "SOLO"};
 static const char *const L_ARP[] = {"UP", "DOWN", "UP/DN"};
 static const char *const L_THEME[] = {"GREEN", "AMBER", "CYAN", "RED", "MONO", "JUNO"};
 static const char *const L_LINK[] = {"OFF", "HOST"};
+static const char *const L_USB[] = {"MASTER", "FULL"};
 static uint8_t link_on;                  /* the USB port plays host to another FM-1 (or a synth); never saved: boot is a device */
 
 #define P(n, f, mx) {n, 0, (uint8_t)offsetof(j_patch_t, f), 0, mx, 0}
@@ -80,7 +84,8 @@ static const page_t PAGE[NPAGE] = {
                     {"ARP", 1, (uint8_t)offsetof(j_global_t, arp_mode), 0, 2, L_ARP},
                     {"OCTAVES", 1, (uint8_t)offsetof(j_global_t, arp_range), 1, 3, 0}},
                    {{"TEMPO", 1, (uint8_t)offsetof(j_global_t, arp_rate), 0, 127, 0},
-                    {"THEME", 3, (uint8_t)offsetof(settings_t, theme), 0, 5, L_THEME}, {"LINK", 4, 0, 0, 1, L_LINK}, {0}}}},
+                    {"THEME", 3, (uint8_t)offsetof(settings_t, theme), 0, 5, L_THEME}, {"LINK", 4, 0, 0, 1, L_LINK},
+                    {"USB OUT", 3, (uint8_t)offsetof(settings_t, usb_full), 0, 1, L_USB}}}},
 };
 
 static int pget(const prm_t *q)
@@ -285,6 +290,7 @@ static void settings_defaults(void)
     set.arp_rate = 80;
     set.theme = 5;
     set.seq_n = 0;
+    set.usb_full = 0;
 }
 
 static int seq_ok(void)
@@ -308,6 +314,8 @@ void app_init(void)
         set.vel > 127u || set.arp_mode >= J_NARP || set.arp_range < 1u || set.arp_range > 3u || set.arp_rate > 127u ||
         set.theme > 5u || !seq_ok())
         settings_defaults();
+    if (set.usb_full > 1u)                 /* a save from before USB OUT: its padding, whatever it held */
+        set.usb_full = 0;
     if (plat_store_load(OBJ_PATCH, &bank, sizeof bank) != (int)sizeof bank || bank.magic != BANK_MAGIC)
         bank_defaults();
     else
@@ -320,6 +328,7 @@ void app_init(void)
     }
     j_seq_n = set.seq_n;
     palette_set(set.theme);
+    plat_usb_audio_full(set.usb_full);
     cur = set.patch;
     pcopy(&j_p, &bank.p[cur]);
     set_dirty = 0;
@@ -434,8 +443,10 @@ static void param_turn(uint32_t k, int32_t e)    /* K1..K4 */
         patch_dirty = 1;
     else if (q->base != 4)
         set_dirty = 1;
-    if (q->base == 3)
+    if (q->base == 3) {
         palette_set(set.theme);
+        plat_usb_audio_full(set.usb_full);
+    }
     if (q->base == 4)
         plat_usb_host(link_on);
     prm_text(q, t);
@@ -863,6 +874,8 @@ int app_expect(const char *what, int *got)
         *got = link_on;
     else if (!strcmp(what, "theme"))
         *got = set.theme;
+    else if (!strcmp(what, "usbfull"))
+        *got = set.usb_full;
     else if (!strcmp(what, "cutoff"))
         *got = j_p.cutoff;
     else if (!strcmp(what, "res"))

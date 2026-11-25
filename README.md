@@ -54,7 +54,14 @@ The FM-1 only receives MIDI, and there is no SysEx. Build your own front end fro
 | OCT- / OCT+ | octave; **both together = panic** (all notes off, stops the sequence and recording) |
 | Touch keys | the 27-key keyboard |
 
-GLO page 2 holds TEMPO (the arp/sequence rate), and THEME.
+GLO page 2 holds TEMPO (the arp/sequence rate), THEME, LINK and USB OUT.
+
+## USB audio (recording in a DAW)
+The FM-1 is a class-compliant USB audio interface: 2 inputs (J6's output) and 2 outputs, 16-bit, **44.1 kHz only**.
+macOS shows it as two devices (J6 FM-1 1: inputs, J6 FM-1 2: outputs); for Logic and other DAWs make an aggregate
+device in Audio MIDI Setup (J6 FM-1 1 as the clock source, your speakers with drift correction) and set the project
+to 44.1 kHz. Set **GLO > USB OUT** to **FULL** to send the full level to the computer whatever MASTER says: turn
+MASTER down and the FM-1 is silent while the DAW still records it. LINK must be OFF.
 
 ## Web editor
 A browser-based front end for J6, in [editor/](editor/). It is a static page that runs on your computer and talks to the
