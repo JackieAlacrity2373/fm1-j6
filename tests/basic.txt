@@ -119,3 +119,20 @@ wait 1200
 tap SEQ
 wait 100
 expect seq 0
+
+# USB OUT: MASTER by default, FULL kept across a reboot (the USB audio at full level, MASTER for the speaker only)
+tap HOME
+expect usbfull 0
+tap GLO
+tap GLO
+turn K4 1
+wait 30
+expect usbfull 1
+shot usb.png
+tap SAVE
+wait 100
+reboot
+wait 600
+expect usbfull 1
+expect theme 4
+expect seqn 4
